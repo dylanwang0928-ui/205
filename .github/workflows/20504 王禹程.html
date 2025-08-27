@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扭擺運動模擬</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            flex-direction: column;
+            font-family: sans-serif;
+            color: #333;
+        }
+        canvas {
+            border: 2px solid #ccc;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>扭擺運動模擬</h1>
+    <canvas id="torsionalPendulumCanvas" width="500" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('torsionalPendulumCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 物理常數
+        const K = 0.5; // 扭轉彈性係數
+        const I = 10;  // 轉動慣量
+        const B = 0.1; // 阻尼係數 (模擬空氣阻力)
+        const dt = 0.01; // 時間步長 (越小模擬越精準)
+
+        // 初始狀態
+        let theta = Math.PI / 4; // 初始角度 (45度)
+        let omega = 0;           // 初始角速度
+
+        // 繪圖常數
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const pendulumLength = 200;
+        const pendulumWidth = 10;
+        const massRadius = 30;
+
+        // 繪製扭擺
+        function draw() {
+            // 清空畫布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 計算扭擺的座標
+            const x = centerX + pendulumLength * Math.cos(theta);
+            const y = centerY + pendulumLength * Math.sin(theta);
+
+            // 繪製轉軸
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#666';
+            ctx.fill();
+
+            // 繪製扭擺桿 (代表連結)
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
+            ctx.lineWidth = pendulumWidth;
+            ctx.strokeStyle = '#3498db';
+            ctx.stroke();
+
+            // 繪製扭擺的質量塊
+            ctx.beginPath();
+            ctx.arc(x, y, massRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#e74c3c';
+            ctx.fill();
+        }
+
+        // 物理計算更新
+        function update() {
+            // 計算扭矩 (Torque)
+            // 扭矩 = -K * theta - B * omega
+            const torque = -K * theta - B * omega;
+
+            // 計算角加速度 (Angular Acceleration)
+            // alpha = torque / I
+            const alpha = torque / I;
+
+            // 更新角速度 (使用歐拉法)
+            omega = omega + alpha * dt;
+
+            // 更新角度
+            theta = theta + omega * dt;
+        }
+
+        // 動畫循環
+        function animate() {
+            update();
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        // 啟動動畫
+        animate();
+    </script>
+</body>
+</html>
